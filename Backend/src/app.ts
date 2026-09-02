@@ -1,5 +1,6 @@
 import express from 'express'
 import taskRoutes from './routes/task.routes'
+import { errorHandler } from './middlewares/errorHandler'
 
 const app = express()
 
@@ -12,5 +13,6 @@ app.get('/', (req, res) => {
 })
 
 app.use('/api/tasks', taskRoutes)
+app.use(errorHandler)
 
 export default app

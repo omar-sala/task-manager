@@ -1,29 +1,75 @@
-import { Request, Response } from 'express'
+import { Request, Response, NextFunction } from 'express'
 import prisma from '../lib/prisma'
 
-export const getTasks = async (req: Request, res: Response) => {
+export const getTasks = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const tasks = await prisma.task.findMany({
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
+    const { page, limit } = req.query
+    const pageNumber = page === undefined ? 1 : Number(page)
+    const limitNumber = limit === undefined ? 10 : Number(limit)
+
+    if (!Number.isInteger(pageNumber) || !Number.isInteger(limitNumber)) {
+      return res.status(400).json({
+        success: false,
+        message: 'page and limit must be integers',
+      })
+    }
+
+    if (pageNumber < 1 || limitNumber < 1) {
+      return res.status(400).json({
+        success: false,
+        message: 'page and limit must be greater than 0',
+      })
+    }
+
+    if (limitNumber > 100) {
+      return res.status(400).json({
+        success: false,
+        message: 'limit cannot be greater than 100',
+      })
+    }
+
+    const skip = (pageNumber - 1) * limitNumber
+
+    const [tasks, totalTasks] = await Promise.all([
+      prisma.task.findMany({
+        skip,
+        take: limitNumber,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      prisma.task.count(),
+    ])
+
+    const totalPages = Math.ceil(totalTasks / limitNumber)
 
     res.status(200).json({
       success: true,
       data: tasks,
+      pagination: {
+        page: pageNumber,
+        limit: limitNumber,
+        totalTasks,
+        totalPages,
+        hasNextPage: pageNumber < totalPages,
+        hasPreviousPage: pageNumber > 1,
+      },
     })
   } catch (error) {
     console.error(error)
-
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch tasks',
-    })
+    next(error)
   }
 }
 
-export const getTaskById = async (req: Request, res: Response) => {
+export const getTaskById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const id = req.params.id
 
@@ -52,16 +98,15 @@ export const getTaskById = async (req: Request, res: Response) => {
       data: task,
     })
   } catch (error) {
-    console.error(error)
-
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch task',
-    })
+    next(error)
   }
 }
 
-export const createTask = async (req: Request, res: Response) => {
+export const createTask = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const { title, description } = req.body
 
@@ -77,16 +122,15 @@ export const createTask = async (req: Request, res: Response) => {
       data: task,
     })
   } catch (error) {
-    console.error(error)
-
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create task',
-    })
+    next(error)
   }
 }
 
-export const updateTask = async (req: Request, res: Response) => {
+export const updateTask = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const id = req.params.id
 
@@ -128,16 +172,15 @@ export const updateTask = async (req: Request, res: Response) => {
       data: task,
     })
   } catch (error) {
-    console.error(error)
-
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to update task',
-    })
+    next(error)
   }
 }
 
-export const deleteTask = async (req: Request, res: Response) => {
+export const deleteTask = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const id = req.params.id
 
@@ -172,11 +215,6 @@ export const deleteTask = async (req: Request, res: Response) => {
       message: 'Task deleted successfully',
     })
   } catch (error) {
-    console.error(error)
-
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to delete task',
-    })
+    next(error)
   }
 }
