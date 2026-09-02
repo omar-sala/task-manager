@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import prisma from '../lib/prisma'
+import { AppError } from '../errors/AppError'
 
 export const getTasks = async (
   req: Request,
@@ -87,10 +88,7 @@ export const getTaskById = async (
     })
 
     if (!task) {
-      return res.status(404).json({
-        success: false,
-        message: 'Task not found',
-      })
+      throw new AppError('Task not found', 404)
     }
 
     res.status(200).json({
@@ -150,10 +148,7 @@ export const updateTask = async (
     })
 
     if (!existingTask) {
-      return res.status(404).json({
-        success: false,
-        message: 'Task not found',
-      })
+      throw new AppError('Task not found', 404)
     }
 
     const task = await prisma.task.update({
@@ -198,10 +193,7 @@ export const deleteTask = async (
     })
 
     if (!existingTask) {
-      return res.status(404).json({
-        success: false,
-        message: 'Task not found',
-      })
+      throw new AppError('Task not found', 404)
     }
 
     await prisma.task.delete({
