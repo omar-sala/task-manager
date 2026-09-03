@@ -1,5 +1,9 @@
 import { z } from 'zod'
 
+export const taskIdSchema = z.object({
+  id: z.uuid('Invalid task ID'),
+})
+
 export const createTaskSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().optional(),

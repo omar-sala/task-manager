@@ -72,14 +72,7 @@ export const getTaskById = async (
   next: NextFunction
 ) => {
   try {
-    const id = req.params.id
-
-    if (typeof id !== 'string') {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid task ID',
-      })
-    }
+    const id = req.params.id as string
 
     const task = await prisma.task.findUnique({
       where: {
@@ -130,14 +123,7 @@ export const updateTask = async (
   next: NextFunction
 ) => {
   try {
-    const id = req.params.id
-
-    if (typeof id !== 'string') {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid task ID',
-      })
-    }
+    const id = req.params.id as string
 
     const { title, description, completed } = req.body
 
@@ -177,14 +163,7 @@ export const deleteTask = async (
   next: NextFunction
 ) => {
   try {
-    const id = req.params.id
-
-    if (typeof id !== 'string') {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid task ID',
-      })
-    }
+    const id = req.params.id as string
 
     const existingTask = await prisma.task.findUnique({
       where: {
