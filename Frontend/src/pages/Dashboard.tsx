@@ -1,30 +1,22 @@
+import { useEffect, useState } from 'react'
 import { CheckCircle2, Circle, ListTodo } from 'lucide-react'
 import StatCard from '../components/dashboard/StatCard'
 import TaskList from '../components/dashboard/TaskList'
+import { getTasks } from '../services/api'
 import type { Task } from '../types/task'
 
-const tasks: Task[] = [
-  {
-    id: '1',
-    title: 'Learn React',
-    description: 'Practice React fundamentals',
-    completed: true,
-  },
-  {
-    id: '2',
-    title: 'Connect API',
-    description: 'Integrate the Task Manager API',
-    completed: false,
-  },
-  {
-    id: '3',
-    title: 'Build Dashboard',
-    description: 'Create a clean task management dashboard',
-    completed: false,
-  },
-]
-
 function Dashboard() {
+  const [tasks, setTasks] = useState<Task[]>([])
+
+  useEffect(() => {
+    const loadTasks = async () => {
+      const data = await getTasks()
+      setTasks(data)
+    }
+
+    loadTasks()
+  }, [])
+
   const completedTasks = tasks.filter((task) => task.completed).length
   const pendingTasks = tasks.length - completedTasks
 
