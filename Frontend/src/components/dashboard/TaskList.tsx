@@ -1,4 +1,4 @@
-import { Search } from 'lucide-react'
+import { ListTodo, Search } from 'lucide-react'
 import TaskItem from '../tasks/TaskItem'
 import type { Task } from '../../types/task'
 
@@ -33,9 +33,21 @@ function TaskList({ tasks }: TaskListProps) {
       </div>
 
       <div className="divide-y divide-slate-100">
-        {tasks.map((task) => (
-          <TaskItem key={task.id} task={task} />
-        ))}
+        {tasks.length === 0 ? (
+          <div className="p-10 text-center">
+            <ListTodo size={32} className="mx-auto text-slate-300" />
+
+            <h3 className="mt-3 text-sm font-medium text-slate-700">
+              No tasks yet
+            </h3>
+
+            <p className="mt-1 text-sm text-slate-500">
+              Create your first task to get started.
+            </p>
+          </div>
+        ) : (
+          tasks.map((task) => <TaskItem key={task.id} task={task} />)
+        )}
       </div>
     </div>
   )

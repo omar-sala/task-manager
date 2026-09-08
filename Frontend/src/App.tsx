@@ -1,5 +1,4 @@
 import Sidebar from './components/layout/Sidebar'
-import Header from './components/layout/Header'
 import Dashboard from './pages/Dashboard'
 
 function App() {
@@ -8,7 +7,6 @@ function App() {
       <Sidebar />
 
       <main className="flex-1">
-        <Header />
         <Dashboard />
       </main>
     </div>
