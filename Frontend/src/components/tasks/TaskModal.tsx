@@ -1,10 +1,42 @@
-import { X } from 'lucide-react'
+import { useState } from 'react'
+import { X, LoaderCircle } from 'lucide-react'
+import { createTask } from '../../services/api'
+import type { Task } from '../../types/task'
 
 interface TaskModalProps {
   onClose: () => void
+  onTaskCreated: (task: Task) => void
 }
 
-function TaskModal({ onClose }: TaskModalProps) {
+function TaskModal({ onClose, onTaskCreated }: TaskModalProps) {
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
+
+    if (!title.trim()) {
+      setError('Title is required')
+      return
+    }
+
+    try {
+      setLoading(true)
+      setError('')
+
+      const task = await createTask(title.trim(), description.trim())
+
+      onTaskCreated(task)
+      onClose()
+    } catch {
+      setError('Failed to create task')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
@@ -19,7 +51,7 @@ function TaskModal({ onClose }: TaskModalProps) {
           </button>
         </div>
 
-        <form className="mt-6 space-y-4">
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
             <label className="mb-1.5 block text-sm font-medium text-slate-700">
               Title
@@ -27,6 +59,8 @@ function TaskModal({ onClose }: TaskModalProps) {
 
             <input
               type="text"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
               placeholder="Enter task title"
               className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-slate-400"
             />
@@ -38,11 +72,15 @@ function TaskModal({ onClose }: TaskModalProps) {
             </label>
 
             <textarea
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
               placeholder="Enter task description"
               rows={4}
               className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-slate-400"
             />
           </div>
+
+          {error && <p className="text-sm text-red-500">{error}</p>}
 
           <div className="flex justify-end gap-3 pt-2">
             <button
@@ -55,9 +93,12 @@ function TaskModal({ onClose }: TaskModalProps) {
 
             <button
               type="submit"
-              className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
+              disabled={loading}
+              className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Create Task
+              {loading && <LoaderCircle size={16} className="animate-spin" />}
+
+              {loading ? 'Creating...' : 'Create Task'}
             </button>
           </div>
         </form>

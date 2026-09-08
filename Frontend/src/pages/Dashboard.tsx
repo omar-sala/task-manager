@@ -80,7 +80,14 @@ function Dashboard() {
         <TaskList tasks={tasks} />
       </section>
 
-      {isModalOpen && <TaskModal onClose={() => setIsModalOpen(false)} />}
+      {isModalOpen && (
+        <TaskModal
+          onClose={() => setIsModalOpen(false)}
+          onTaskCreated={(task) => {
+            setTasks((currentTasks) => [task, ...currentTasks])
+          }}
+        />
+      )}
     </>
   )
 }
