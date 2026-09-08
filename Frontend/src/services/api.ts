@@ -5,10 +5,33 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 })
 
-export const getTasks = async (): Promise<Task[]> => {
-  const response = await api.get('/api/tasks')
+interface Pagination {
+  page: number
+  limit: number
+  total: number
+  totalPages: number
+}
 
-  return response.data.data
+interface GetTasksResponse {
+  tasks: Task[]
+  pagination: Pagination
+}
+
+export const getTasks = async (
+  page = 1,
+  limit = 10
+): Promise<GetTasksResponse> => {
+  const response = await api.get('/api/tasks', {
+    params: {
+      page,
+      limit,
+    },
+  })
+
+  return {
+    tasks: response.data.data,
+    pagination: response.data.pagination,
+  }
 }
 
 export const createTask = async (

@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react'
 import { ListTodo, Search } from 'lucide-react'
 import TaskItem from '../tasks/TaskItem'
 import type { Task } from '../../types/task'
@@ -15,12 +16,27 @@ function TaskList({
   onTaskDeleted,
   onEdit,
 }: TaskListProps) {
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const filteredTasks = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase()
+
+    if (!term) {
+      return tasks
+    }
+
+    return tasks.filter(
+      (task) =>
+        task.title.toLowerCase().includes(term) ||
+        task.description?.toLowerCase().includes(term)
+    )
+  }, [tasks, searchTerm])
+
   return (
     <div className="mt-8 rounded-xl border border-slate-200 bg-white">
       <div className="flex flex-col gap-4 border-b border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="font-semibold">Recent Tasks</h2>
-
           <p className="mt-1 text-sm text-slate-500">
             Keep track of your latest tasks
           </p>
@@ -34,6 +50,8 @@ function TaskList({
 
           <input
             type="text"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
             placeholder="Search tasks..."
             className="w-full rounded-lg border border-slate-200 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-slate-400 sm:w-64"
           />
@@ -41,20 +59,22 @@ function TaskList({
       </div>
 
       <div className="divide-y divide-slate-100">
-        {tasks.length === 0 ? (
+        {filteredTasks.length === 0 ? (
           <div className="p-10 text-center">
             <ListTodo size={32} className="mx-auto text-slate-300" />
 
             <h3 className="mt-3 text-sm font-medium text-slate-700">
-              No tasks yet
+              {searchTerm ? 'No matching tasks' : 'No tasks yet'}
             </h3>
 
             <p className="mt-1 text-sm text-slate-500">
-              Create your first task to get started.
+              {searchTerm
+                ? 'Try searching with a different keyword.'
+                : 'Create your first task to get started.'}
             </p>
           </div>
         ) : (
-          tasks.map((task) => (
+          filteredTasks.map((task) => (
             <TaskItem
               key={task.id}
               task={task}

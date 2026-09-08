@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react'
 import { CheckCircle2, Circle, ListTodo, LoaderCircle } from 'lucide-react'
-
 import Header from '../components/layout/Header'
 import StatCard from '../components/dashboard/StatCard'
 import TaskList from '../components/dashboard/TaskList'
 import TaskModal from '../components/tasks/TaskModal'
-
 import { getTasks } from '../services/api'
 import type { Task } from '../types/task'
 
@@ -15,12 +13,24 @@ function Dashboard() {
   const [error, setError] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | undefined>()
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0,
+  })
 
   useEffect(() => {
     const loadTasks = async () => {
       try {
-        const data = await getTasks()
-        setTasks(data)
+        setLoading(true)
+        setError('')
+
+        const response = await getTasks(currentPage, 10)
+
+        setTasks(response.tasks)
+        setPagination(response.pagination)
       } catch {
         setError('Failed to load tasks')
       } finally {
@@ -29,7 +39,7 @@ function Dashboard() {
     }
 
     loadTasks()
-  }, [])
+  }, [currentPage])
 
   const completedTasks = tasks.filter((task) => task.completed).length
 
@@ -97,6 +107,31 @@ function Dashboard() {
             setIsModalOpen(true)
           }}
         />
+        {pagination.totalPages > 1 && (
+          <div className="mt-6 flex items-center justify-between">
+            <p className="text-sm text-slate-500">
+              Page {pagination.page} of {pagination.totalPages}
+            </p>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCurrentPage((page) => page - 1)}
+                disabled={currentPage === 1 || loading}
+                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Previous
+              </button>
+
+              <button
+                onClick={() => setCurrentPage((page) => page + 1)}
+                disabled={currentPage === pagination.totalPages || loading}
+                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </section>
 
       {isModalOpen && (

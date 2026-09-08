@@ -8,9 +8,10 @@ export const getTasks = async (
   next: NextFunction
 ) => {
   try {
-    const { page, limit } = req.query
+    const { page, limit, search } = req.query
     const pageNumber = page === undefined ? 1 : Number(page)
     const limitNumber = limit === undefined ? 10 : Number(limit)
+    const searchTerm = typeof search === 'string' ? search.trim() : ''
 
     if (!Number.isInteger(pageNumber) || !Number.isInteger(limitNumber)) {
       return res.status(400).json({
@@ -39,11 +40,48 @@ export const getTasks = async (
       prisma.task.findMany({
         skip,
         take: limitNumber,
+        where: searchTerm
+          ? {
+              OR: [
+                {
+                  title: {
+                    contains: searchTerm,
+                    mode: 'insensitive',
+                  },
+                },
+                {
+                  description: {
+                    contains: searchTerm,
+                    mode: 'insensitive',
+                  },
+                },
+              ],
+            }
+          : undefined,
         orderBy: {
           createdAt: 'desc',
         },
       }),
-      prisma.task.count(),
+      prisma.task.count({
+        where: searchTerm
+          ? {
+              OR: [
+                {
+                  title: {
+                    contains: searchTerm,
+                    mode: 'insensitive',
+                  },
+                },
+                {
+                  description: {
+                    contains: searchTerm,
+                    mode: 'insensitive',
+                  },
+                },
+              ],
+            }
+          : undefined,
+      }),
     ])
 
     const totalPages = Math.ceil(totalTasks / limitNumber)
