@@ -86,6 +86,11 @@ function Dashboard() {
               )
             )
           }}
+          onTaskDeleted={(id) => {
+            setTasks((currentTasks) =>
+              currentTasks.filter((task) => task.id !== id)
+            )
+          }}
         />
       </section>
 

@@ -5,9 +5,10 @@ import type { Task } from '../../types/task'
 interface TaskListProps {
   tasks: Task[]
   onTaskUpdated: (task: Task) => void
+  onTaskDeleted: (id: string) => void
 }
 
-function TaskList({ tasks, onTaskUpdated }: TaskListProps) {
+function TaskList({ tasks, onTaskUpdated, onTaskDeleted }: TaskListProps) {
   return (
     <div className="mt-8 rounded-xl border border-slate-200 bg-white">
       <div className="flex flex-col gap-4 border-b border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between">
@@ -48,7 +49,12 @@ function TaskList({ tasks, onTaskUpdated }: TaskListProps) {
           </div>
         ) : (
           tasks.map((task) => (
-            <TaskItem key={task.id} task={task} onTaskUpdated={onTaskUpdated} />
+            <TaskItem
+              key={task.id}
+              task={task}
+              onTaskUpdated={onTaskUpdated}
+              onTaskDeleted={onTaskDeleted}
+            />
           ))
         )}
       </div>

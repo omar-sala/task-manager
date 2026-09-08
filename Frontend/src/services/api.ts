@@ -36,4 +36,8 @@ export const updateTask = async (
   return response.data.data
 }
 
+export const deleteTask = async (id: string): Promise<void> => {
+  await api.delete(`/api/tasks/${id}`)
+}
+
 export default api
