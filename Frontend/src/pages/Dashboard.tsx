@@ -14,6 +14,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingTask, setEditingTask] = useState<Task | undefined>()
 
   useEffect(() => {
     const loadTasks = async () => {
@@ -91,14 +92,29 @@ function Dashboard() {
               currentTasks.filter((task) => task.id !== id)
             )
           }}
+          onEdit={(task) => {
+            setEditingTask(task)
+            setIsModalOpen(true)
+          }}
         />
       </section>
 
       {isModalOpen && (
         <TaskModal
-          onClose={() => setIsModalOpen(false)}
+          task={editingTask}
+          onClose={() => {
+            setIsModalOpen(false)
+            setEditingTask(undefined)
+          }}
           onTaskCreated={(task) => {
             setTasks((currentTasks) => [task, ...currentTasks])
+          }}
+          onTaskUpdated={(updatedTask) => {
+            setTasks((currentTasks) =>
+              currentTasks.map((task) =>
+                task.id === updatedTask.id ? updatedTask : task
+              )
+            )
           }}
         />
       )}

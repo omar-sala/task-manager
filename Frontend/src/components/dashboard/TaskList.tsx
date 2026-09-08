@@ -6,9 +6,15 @@ interface TaskListProps {
   tasks: Task[]
   onTaskUpdated: (task: Task) => void
   onTaskDeleted: (id: string) => void
+  onEdit: (task: Task) => void
 }
 
-function TaskList({ tasks, onTaskUpdated, onTaskDeleted }: TaskListProps) {
+function TaskList({
+  tasks,
+  onTaskUpdated,
+  onTaskDeleted,
+  onEdit,
+}: TaskListProps) {
   return (
     <div className="mt-8 rounded-xl border border-slate-200 bg-white">
       <div className="flex flex-col gap-4 border-b border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between">
@@ -54,6 +60,7 @@ function TaskList({ tasks, onTaskUpdated, onTaskDeleted }: TaskListProps) {
               task={task}
               onTaskUpdated={onTaskUpdated}
               onTaskDeleted={onTaskDeleted}
+              onEdit={onEdit}
             />
           ))
         )}

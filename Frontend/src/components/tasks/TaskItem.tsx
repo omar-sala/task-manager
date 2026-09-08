@@ -1,4 +1,4 @@
-import { CheckCircle2, Circle, Trash2 } from 'lucide-react'
+import { CheckCircle2, Circle, Pencil, Trash2 } from 'lucide-react'
 import { updateTask } from '../../services/api'
 import { deleteTask } from '../../services/api'
 import type { Task } from '../../types/task'
@@ -7,9 +7,15 @@ interface TaskItemProps {
   task: Task
   onTaskUpdated: (task: Task) => void
   onTaskDeleted: (id: string) => void
+  onEdit: (task: Task) => void
 }
 
-function TaskItem({ task, onTaskUpdated, onTaskDeleted }: TaskItemProps) {
+function TaskItem({
+  task,
+  onTaskUpdated,
+  onTaskDeleted,
+  onEdit,
+}: TaskItemProps) {
   const handleToggle = async () => {
     try {
       const updatedTask = await updateTask(task.id, {
@@ -57,6 +63,13 @@ function TaskItem({ task, onTaskUpdated, onTaskDeleted }: TaskItemProps) {
           </p>
         </div>
       </div>
+
+      <button
+        onClick={() => onEdit(task)}
+        className="shrink-0 rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+      >
+        <Pencil size={18} />
+      </button>
 
       <button
         onClick={handleDelete}

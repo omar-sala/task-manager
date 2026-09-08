@@ -1,20 +1,27 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { X, LoaderCircle } from 'lucide-react'
-import { createTask } from '../../services/api'
+import { createTask, updateTask } from '../../services/api'
 import type { Task } from '../../types/task'
 
 interface TaskModalProps {
+  task?: Task
   onClose: () => void
   onTaskCreated: (task: Task) => void
+  onTaskUpdated: (task: Task) => void
 }
 
-function TaskModal({ onClose, onTaskCreated }: TaskModalProps) {
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
+function TaskModal({
+  task,
+  onClose,
+  onTaskCreated,
+  onTaskUpdated,
+}: TaskModalProps) {
+  const [title, setTitle] = useState(task?.title ?? '')
+  const [description, setDescription] = useState(task?.description ?? '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
 
     if (!title.trim()) {
@@ -26,12 +33,22 @@ function TaskModal({ onClose, onTaskCreated }: TaskModalProps) {
       setLoading(true)
       setError('')
 
-      const task = await createTask(title.trim(), description.trim())
+      if (task) {
+        const updatedTask = await updateTask(task.id, {
+          title: title.trim(),
+          description: description.trim(),
+        })
 
-      onTaskCreated(task)
+        onTaskUpdated(updatedTask)
+      } else {
+        const newTask = await createTask(title.trim(), description.trim())
+
+        onTaskCreated(newTask)
+      }
+
       onClose()
     } catch {
-      setError('Failed to create task')
+      setError(task ? 'Failed to update task' : 'Failed to create task')
     } finally {
       setLoading(false)
     }
@@ -41,8 +58,9 @@ function TaskModal({ onClose, onTaskCreated }: TaskModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Add New Task</h2>
-
+          <h2 className="text-lg font-semibold">
+            {task ? 'Edit Task' : 'Add New Task'}
+          </h2>
           <button
             onClick={onClose}
             className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
@@ -98,7 +116,13 @@ function TaskModal({ onClose, onTaskCreated }: TaskModalProps) {
             >
               {loading && <LoaderCircle size={16} className="animate-spin" />}
 
-              {loading ? 'Creating...' : 'Create Task'}
+              {loading
+                ? task
+                  ? 'Updating...'
+                  : 'Creating...'
+                : task
+                  ? 'Update Task'
+                  : 'Create Task'}
             </button>
           </div>
         </form>
