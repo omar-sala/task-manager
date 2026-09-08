@@ -77,7 +77,16 @@ function Dashboard() {
           />
         </div>
 
-        <TaskList tasks={tasks} />
+        <TaskList
+          tasks={tasks}
+          onTaskUpdated={(updatedTask) => {
+            setTasks((currentTasks) =>
+              currentTasks.map((task) =>
+                task.id === updatedTask.id ? updatedTask : task
+              )
+            )
+          }}
+        />
       </section>
 
       {isModalOpen && (

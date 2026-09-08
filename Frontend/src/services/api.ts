@@ -23,4 +23,17 @@ export const createTask = async (
   return response.data.data
 }
 
+export const updateTask = async (
+  id: string,
+  data: {
+    title?: string
+    description?: string
+    completed?: boolean
+  }
+): Promise<Task> => {
+  const response = await api.patch(`/api/tasks/${id}`, data)
+
+  return response.data.data
+}
+
 export default api

@@ -1,19 +1,35 @@
 import { CheckCircle2, Circle, Trash2 } from 'lucide-react'
+import { updateTask } from '../../services/api'
 import type { Task } from '../../types/task'
 
 interface TaskItemProps {
   task: Task
+  onTaskUpdated: (task: Task) => void
 }
 
-function TaskItem({ task }: TaskItemProps) {
+function TaskItem({ task, onTaskUpdated }: TaskItemProps) {
+  const handleToggle = async () => {
+    try {
+      const updatedTask = await updateTask(task.id, {
+        completed: !task.completed,
+      })
+
+      onTaskUpdated(updatedTask)
+    } catch {
+      console.error('Failed to update task')
+    }
+  }
+
   return (
     <div className="flex items-center justify-between gap-4 p-5 hover:bg-slate-50">
       <div className="flex min-w-0 items-center gap-4">
-        {task.completed ? (
-          <CheckCircle2 size={21} className="shrink-0 text-green-500" />
-        ) : (
-          <Circle size={21} className="shrink-0 text-slate-300" />
-        )}
+        <button onClick={handleToggle}>
+          {task.completed ? (
+            <CheckCircle2 size={21} className="shrink-0 text-green-500" />
+          ) : (
+            <Circle size={21} className="shrink-0 text-slate-300" />
+          )}
+        </button>
 
         <div className="min-w-0">
           <h3
