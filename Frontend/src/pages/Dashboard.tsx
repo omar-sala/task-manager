@@ -20,6 +20,17 @@ function Dashboard() {
     total: 0,
     totalPages: 0,
   })
+  const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm)
+      setCurrentPage(1)
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [searchTerm])
 
   useEffect(() => {
     const loadTasks = async () => {
@@ -27,7 +38,7 @@ function Dashboard() {
         setLoading(true)
         setError('')
 
-        const response = await getTasks(currentPage, 10)
+        const response = await getTasks(currentPage, 10, debouncedSearch)
 
         setTasks(response.tasks)
         setPagination(response.pagination)
@@ -39,7 +50,12 @@ function Dashboard() {
     }
 
     loadTasks()
-  }, [currentPage])
+  }, [currentPage, debouncedSearch])
+
+  const handleSearch = (value: string) => {
+    setSearchTerm(value)
+    setCurrentPage(1)
+  }
 
   const completedTasks = tasks.filter((task) => task.completed).length
 
@@ -90,6 +106,8 @@ function Dashboard() {
 
         <TaskList
           tasks={tasks}
+          searchTerm={searchTerm}
+          onSearch={handleSearch}
           onTaskUpdated={(updatedTask) => {
             setTasks((currentTasks) =>
               currentTasks.map((task) =>

@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
 import { ListTodo, Search } from 'lucide-react'
 import TaskItem from '../tasks/TaskItem'
 import type { Task } from '../../types/task'
 
 interface TaskListProps {
   tasks: Task[]
+  searchTerm: string
+  onSearch: (value: string) => void
   onTaskUpdated: (task: Task) => void
   onTaskDeleted: (id: string) => void
   onEdit: (task: Task) => void
@@ -12,26 +13,12 @@ interface TaskListProps {
 
 function TaskList({
   tasks,
+  searchTerm,
+  onSearch,
   onTaskUpdated,
   onTaskDeleted,
   onEdit,
 }: TaskListProps) {
-  const [searchTerm, setSearchTerm] = useState('')
-
-  const filteredTasks = useMemo(() => {
-    const term = searchTerm.trim().toLowerCase()
-
-    if (!term) {
-      return tasks
-    }
-
-    return tasks.filter(
-      (task) =>
-        task.title.toLowerCase().includes(term) ||
-        task.description?.toLowerCase().includes(term)
-    )
-  }, [tasks, searchTerm])
-
   return (
     <div className="mt-8 rounded-xl border border-slate-200 bg-white">
       <div className="flex flex-col gap-4 border-b border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between">
@@ -51,7 +38,7 @@ function TaskList({
           <input
             type="text"
             value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
+            onChange={(event) => onSearch(event.target.value)}
             placeholder="Search tasks..."
             className="w-full rounded-lg border border-slate-200 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-slate-400 sm:w-64"
           />
@@ -59,7 +46,7 @@ function TaskList({
       </div>
 
       <div className="divide-y divide-slate-100">
-        {filteredTasks.length === 0 ? (
+        {tasks.length === 0 ? (
           <div className="p-10 text-center">
             <ListTodo size={32} className="mx-auto text-slate-300" />
 
@@ -74,7 +61,7 @@ function TaskList({
             </p>
           </div>
         ) : (
-          filteredTasks.map((task) => (
+          tasks.map((task) => (
             <TaskItem
               key={task.id}
               task={task}
