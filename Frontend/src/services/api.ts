@@ -5,11 +5,13 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 })
 
-interface Pagination {
+export interface Pagination {
   page: number
   limit: number
-  total: number
+  totalTasks: number
   totalPages: number
+  hasNextPage: boolean
+  hasPreviousPage: boolean
 }
 
 interface GetTasksResponse {

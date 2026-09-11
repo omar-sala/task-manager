@@ -1,13 +1,10 @@
 import { useState } from 'react'
-import { CheckCircle2, Circle, ListTodo, LoaderCircle } from 'lucide-react'
-import Header from '../components/layout/Header'
-import StatCard from '../components/dashboard/StatCard'
 import TaskList from '../components/dashboard/TaskList'
 import TaskModal from '../components/tasks/TaskModal'
 import type { Task } from '../types/task'
 import useTasks from '../hooks/useTasks'
 
-function Dashboard() {
+function Tasks() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | undefined>()
 
@@ -16,68 +13,46 @@ function Dashboard() {
     setTasks,
     loading,
     error,
-    currentPage,
     setCurrentPage,
     pagination,
     searchTerm,
     setSearchTerm,
   } = useTasks()
 
-  const handleSearch = (value: string) => {
-    setSearchTerm(value)
-  }
-
-  const completedTasks = tasks.filter((task) => task.completed).length
-
-  const pendingTasks = tasks.length - completedTasks
-
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <LoaderCircle size={32} className="animate-spin text-slate-500" />
-      </div>
-    )
+    return <div className="p-6">Loading tasks...</div>
   }
 
   if (error) {
-    return (
-      <div className="p-6">
-        <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-600">
-          {error}
-        </div>
-      </div>
-    )
+    return <div className="p-6 text-red-500">{error}</div>
   }
 
   return (
     <>
-      <Header onAddTask={() => setIsModalOpen(true)} />
-
-      <section className="p-6">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <StatCard
-            title="Total Tasks"
-            value={tasks.length}
-            icon={<ListTodo size={20} />}
-          />
-
-          <StatCard
-            title="Completed"
-            value={completedTasks}
-            icon={<CheckCircle2 size={20} />}
-          />
-
-          <StatCard
-            title="Pending"
-            value={pendingTasks}
-            icon={<Circle size={20} />}
-          />
+      <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6">
+        <div>
+          <h1 className="text-lg font-semibold">All Tasks</h1>
+          <p className="text-xs text-slate-500">
+            View and manage all your tasks
+          </p>
         </div>
 
+        <button
+          onClick={() => {
+            setEditingTask(undefined)
+            setIsModalOpen(true)
+          }}
+          className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
+        >
+          Add Task
+        </button>
+      </header>
+
+      <section className="p-6">
         <TaskList
           tasks={tasks}
           searchTerm={searchTerm}
-          onSearch={handleSearch}
+          onSearch={setSearchTerm}
           onTaskUpdated={(updatedTask) => {
             setTasks((currentTasks) =>
               currentTasks.map((task) =>
@@ -95,6 +70,7 @@ function Dashboard() {
             setIsModalOpen(true)
           }}
         />
+
         {pagination.totalPages > 1 && (
           <div className="mt-6 flex items-center justify-between">
             <p className="text-sm text-slate-500">
@@ -104,7 +80,7 @@ function Dashboard() {
             <div className="flex gap-2">
               <button
                 onClick={() => setCurrentPage((page) => page - 1)}
-                disabled={currentPage === 1 || loading}
+                disabled={!pagination.hasPreviousPage}
                 className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Previous
@@ -112,7 +88,7 @@ function Dashboard() {
 
               <button
                 onClick={() => setCurrentPage((page) => page + 1)}
-                disabled={currentPage === pagination.totalPages || loading}
+                disabled={!pagination.hasNextPage}
                 className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Next
@@ -145,4 +121,4 @@ function Dashboard() {
   )
 }
 
-export default Dashboard
+export default Tasks

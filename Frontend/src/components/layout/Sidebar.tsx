@@ -1,4 +1,5 @@
 import { LayoutDashboard, ListTodo } from 'lucide-react'
+import { NavLink } from 'react-router-dom'
 
 function Sidebar() {
   return (
@@ -12,15 +13,34 @@ function Sidebar() {
       </div>
 
       <nav className="flex-1 space-y-2 p-4">
-        <button className="flex w-full items-center gap-3 rounded-lg bg-slate-100 px-4 py-3 text-sm font-medium">
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) =>
+            `flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium ${
+              isActive
+                ? 'bg-slate-100 text-slate-900'
+                : 'text-slate-500 hover:bg-slate-50'
+            }`
+          }
+        >
           <LayoutDashboard size={18} />
           Dashboard
-        </button>
+        </NavLink>
 
-        <button className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm text-slate-500 hover:bg-slate-50">
+        <NavLink
+          to="/tasks"
+          className={({ isActive }) =>
+            `flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm ${
+              isActive
+                ? 'bg-slate-100 font-medium text-slate-900'
+                : 'text-slate-500 hover:bg-slate-50'
+            }`
+          }
+        >
           <ListTodo size={18} />
           All Tasks
-        </button>
+        </NavLink>
       </nav>
     </aside>
   )
