@@ -8,10 +8,15 @@ export const getTasks = async (
   next: NextFunction
 ) => {
   try {
-    const { page, limit, search } = req.query
+    const { page, limit, search, status } = req.query
+
     const pageNumber = page === undefined ? 1 : Number(page)
     const limitNumber = limit === undefined ? 10 : Number(limit)
+
     const searchTerm = typeof search === 'string' ? search.trim() : ''
+
+    const statusFilter =
+      status === 'completed' ? true : status === 'pending' ? false : undefined
 
     if (!Number.isInteger(pageNumber) || !Number.isInteger(limitNumber)) {
       return res.status(400).json({
@@ -36,57 +41,51 @@ export const getTasks = async (
 
     const skip = (pageNumber - 1) * limitNumber
 
+    const where = {
+      ...(searchTerm
+        ? {
+            OR: [
+              {
+                title: {
+                  contains: searchTerm,
+                  mode: 'insensitive' as const,
+                },
+              },
+              {
+                description: {
+                  contains: searchTerm,
+                  mode: 'insensitive' as const,
+                },
+              },
+            ],
+          }
+        : {}),
+
+      ...(statusFilter !== undefined
+        ? {
+            completed: statusFilter,
+          }
+        : {}),
+    }
+
     const [tasks, totalTasks] = await Promise.all([
       prisma.task.findMany({
         skip,
         take: limitNumber,
-        where: searchTerm
-          ? {
-              OR: [
-                {
-                  title: {
-                    contains: searchTerm,
-                    mode: 'insensitive',
-                  },
-                },
-                {
-                  description: {
-                    contains: searchTerm,
-                    mode: 'insensitive',
-                  },
-                },
-              ],
-            }
-          : undefined,
+        where,
         orderBy: {
           createdAt: 'desc',
         },
       }),
+
       prisma.task.count({
-        where: searchTerm
-          ? {
-              OR: [
-                {
-                  title: {
-                    contains: searchTerm,
-                    mode: 'insensitive',
-                  },
-                },
-                {
-                  description: {
-                    contains: searchTerm,
-                    mode: 'insensitive',
-                  },
-                },
-              ],
-            }
-          : undefined,
+        where,
       }),
     ])
 
     const totalPages = Math.ceil(totalTasks / limitNumber)
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: tasks,
       pagination: {
