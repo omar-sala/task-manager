@@ -35,9 +35,8 @@ function Dashboard() {
     setCurrentPage(1)
   }
 
-  const completedTasks = tasks.filter((task) => task.completed).length
-
-  const pendingTasks = tasks.length - completedTasks
+  const completedTasks = (tasks ?? []).filter((task) => task.completed).length
+  const pendingTasks = (tasks ?? []).length - completedTasks
 
   if (loading) {
     return (
