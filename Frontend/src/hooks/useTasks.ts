@@ -4,8 +4,10 @@ import type { Task } from '../types/task'
 import type { Pagination } from '../services/api'
 
 function useTasks() {
+  const [status, setStatus] = useState('all')
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
+  const [isFetching, setIsFetching] = useState(false)
   const [error, setError] = useState('')
 
   const [currentPage, setCurrentPage] = useState(1)
@@ -34,33 +36,59 @@ function useTasks() {
   useEffect(() => {
     const loadTasks = async () => {
       try {
-        setLoading(true)
+        setIsFetching(true)
         setError('')
 
-        const response = await getTasks(currentPage, 10, debouncedSearch)
+        const response = await getTasks(
+          currentPage,
+          10,
+          debouncedSearch,
+          status
+        )
 
         setTasks(response.tasks)
         setPagination(response.pagination)
       } catch {
         setError('Failed to load tasks')
       } finally {
+        setIsFetching(false)
         setLoading(false)
       }
     }
 
     loadTasks()
-  }, [currentPage, debouncedSearch])
+  }, [currentPage, debouncedSearch, status])
+
+  const refreshTasks = async () => {
+    try {
+      setIsFetching(true)
+      setError('')
+
+      const response = await getTasks(currentPage, 10, debouncedSearch, status)
+
+      setTasks(response.tasks)
+      setPagination(response.pagination)
+    } catch {
+      setError('Failed to load tasks')
+    } finally {
+      setIsFetching(false)
+    }
+  }
 
   return {
     tasks,
     setTasks,
     loading,
+    isFetching,
     error,
     currentPage,
     setCurrentPage,
     pagination,
     searchTerm,
+    status,
+    setStatus,
     setSearchTerm,
+    refreshTasks,
   }
 }
 

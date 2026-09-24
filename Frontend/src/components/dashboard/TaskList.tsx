@@ -6,6 +6,8 @@ interface TaskListProps {
   tasks: Task[]
   searchTerm: string
   onSearch: (value: string) => void
+  status: string
+  onStatusChange: (value: string) => void
   onTaskUpdated: (task: Task) => void
   onTaskDeleted: (id: string) => void
   onEdit: (task: Task) => void
@@ -15,6 +17,8 @@ function TaskList({
   tasks,
   searchTerm,
   onSearch,
+  status,
+  onStatusChange,
   onTaskUpdated,
   onTaskDeleted,
   onEdit,
@@ -24,24 +28,37 @@ function TaskList({
       <div className="flex flex-col gap-4 border-b border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="font-semibold">Recent Tasks</h2>
+
           <p className="mt-1 text-sm text-slate-500">
             Keep track of your latest tasks
           </p>
         </div>
 
-        <div className="relative">
-          <Search
-            size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-          />
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="relative">
+            <Search
+              size={18}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+            />
 
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(event) => onSearch(event.target.value)}
-            placeholder="Search tasks..."
-            className="w-full rounded-lg border border-slate-200 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-slate-400 sm:w-64"
-          />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(event) => onSearch(event.target.value)}
+              placeholder="Search tasks..."
+              className="w-full rounded-lg border border-slate-200 py-2.5 pl-10 pr-4 text-sm outline-none focus:border-slate-400 sm:w-64"
+            />
+          </div>
+
+          <select
+            value={status}
+            onChange={(event) => onStatusChange(event.target.value)}
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-600 outline-none focus:border-slate-400"
+          >
+            <option value="all">All</option>
+            <option value="pending">Pending</option>
+            <option value="completed">Completed</option>
+          </select>
         </div>
       </div>
 

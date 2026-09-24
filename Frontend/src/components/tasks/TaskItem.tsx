@@ -29,9 +29,16 @@ function TaskItem({
   }
 
   const handleDelete = async () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this task?'
+    )
+
+    if (!confirmed) {
+      return
+    }
+
     try {
       await deleteTask(task.id)
-
       onTaskDeleted(task.id)
     } catch {
       console.error('Failed to delete task')

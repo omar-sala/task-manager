@@ -15,16 +15,24 @@ function Dashboard() {
     tasks,
     setTasks,
     loading,
+    isFetching,
     error,
-    currentPage,
     setCurrentPage,
     pagination,
     searchTerm,
+    status,
+    setStatus,
     setSearchTerm,
+    refreshTasks,
   } = useTasks()
 
   const handleSearch = (value: string) => {
     setSearchTerm(value)
+  }
+
+  const handleStatusChange = (value: string) => {
+    setStatus(value)
+    setCurrentPage(1)
   }
 
   const completedTasks = tasks.filter((task) => task.completed).length
@@ -51,7 +59,12 @@ function Dashboard() {
 
   return (
     <>
-      <Header onAddTask={() => setIsModalOpen(true)} />
+      <Header
+        onAddTask={() => {
+          setEditingTask(undefined)
+          setIsModalOpen(true)
+        }}
+      />
 
       <section className="p-6">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -78,6 +91,8 @@ function Dashboard() {
           tasks={tasks}
           searchTerm={searchTerm}
           onSearch={handleSearch}
+          status={status}
+          onStatusChange={handleStatusChange}
           onTaskUpdated={(updatedTask) => {
             setTasks((currentTasks) =>
               currentTasks.map((task) =>
@@ -85,16 +100,15 @@ function Dashboard() {
               )
             )
           }}
-          onTaskDeleted={(id) => {
-            setTasks((currentTasks) =>
-              currentTasks.filter((task) => task.id !== id)
-            )
+          onTaskDeleted={async () => {
+            await refreshTasks()
           }}
           onEdit={(task) => {
             setEditingTask(task)
             setIsModalOpen(true)
           }}
         />
+
         {pagination.totalPages > 1 && (
           <div className="mt-6 flex items-center justify-between">
             <p className="text-sm text-slate-500">
@@ -104,7 +118,7 @@ function Dashboard() {
             <div className="flex gap-2">
               <button
                 onClick={() => setCurrentPage((page) => page - 1)}
-                disabled={currentPage === 1 || loading}
+                disabled={!pagination.hasPreviousPage || isFetching}
                 className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Previous
@@ -112,7 +126,7 @@ function Dashboard() {
 
               <button
                 onClick={() => setCurrentPage((page) => page + 1)}
-                disabled={currentPage === pagination.totalPages || loading}
+                disabled={!pagination.hasNextPage || isFetching}
                 className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Next

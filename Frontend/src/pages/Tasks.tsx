@@ -12,12 +12,21 @@ function Tasks() {
     tasks,
     setTasks,
     loading,
+    isFetching,
     error,
     setCurrentPage,
     pagination,
     searchTerm,
+    status,
+    setStatus,
     setSearchTerm,
+    refreshTasks,
   } = useTasks()
+
+  const handleStatusChange = (value: string) => {
+    setStatus(value)
+    setCurrentPage(1)
+  }
 
   if (loading) {
     return <div className="p-6">Loading tasks...</div>
@@ -32,6 +41,7 @@ function Tasks() {
       <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6">
         <div>
           <h1 className="text-lg font-semibold">All Tasks</h1>
+
           <p className="text-xs text-slate-500">
             View and manage all your tasks
           </p>
@@ -53,6 +63,8 @@ function Tasks() {
           tasks={tasks}
           searchTerm={searchTerm}
           onSearch={setSearchTerm}
+          status={status}
+          onStatusChange={handleStatusChange}
           onTaskUpdated={(updatedTask) => {
             setTasks((currentTasks) =>
               currentTasks.map((task) =>
@@ -60,10 +72,8 @@ function Tasks() {
               )
             )
           }}
-          onTaskDeleted={(id) => {
-            setTasks((currentTasks) =>
-              currentTasks.filter((task) => task.id !== id)
-            )
+          onTaskDeleted={async () => {
+            await refreshTasks()
           }}
           onEdit={(task) => {
             setEditingTask(task)
@@ -80,7 +90,7 @@ function Tasks() {
             <div className="flex gap-2">
               <button
                 onClick={() => setCurrentPage((page) => page - 1)}
-                disabled={!pagination.hasPreviousPage}
+                disabled={!pagination.hasPreviousPage || isFetching}
                 className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Previous
@@ -88,7 +98,7 @@ function Tasks() {
 
               <button
                 onClick={() => setCurrentPage((page) => page + 1)}
-                disabled={!pagination.hasNextPage}
+                disabled={!pagination.hasNextPage || isFetching}
                 className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Next

@@ -22,13 +22,15 @@ interface GetTasksResponse {
 export const getTasks = async (
   page = 1,
   limit = 10,
-  search = ''
+  search = '',
+  status = 'all'
 ): Promise<GetTasksResponse> => {
   const response = await api.get('/api/tasks', {
     params: {
       page,
       limit,
       search,
+      status,
     },
   })
 
